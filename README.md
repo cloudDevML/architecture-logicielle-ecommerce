@@ -212,6 +212,5 @@ Le rapport traite en profondeur des 4 axes imposés :
 * **Abdou Salam MBOUP**
 * **Matar Faly SAMBE**
 
-*Élèves-Ingénieurs en Génie Informatique & Télécommunications — DIC2 Promotion 2026*  
+*Élèves-Ingénieurs en Génie Informatique & Télécommunications — DIC2 *  
 *École Polytechnique de Thiès (EPT)*  
-*Encadrement : Professeurs du Séminaire d'Architecture Logicielle*
