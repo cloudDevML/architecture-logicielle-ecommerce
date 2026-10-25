@@ -156,8 +156,7 @@ docker compose up -d
 ## 5. Industrialisation & CI/CD
 
 Le projet intègre un pipeline CI/CD automatisé conforme aux exigences du séminaire :
-* **GitLab CI** : Configuration officielle via [`.gitlab-ci.yml`](.gitlab-ci.yml).
-* **GitHub Actions** : Workflow miroir via [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml).
+* **GitLab CI** : Configuration officielle de référence via [`.gitlab-ci.yml`](.gitlab-ci.yml).
 
 ### Étapes du Pipeline
 1. **Lint** : Vérification de la syntaxe et des dépendances Maven et TypeScript.
@@ -174,8 +173,7 @@ Les preuves réelles d'exécution et de validation sont consignées dans [docs/p
 
 ```
 architecture_logicielle/
-├── .github/workflows/          # Pipelines GitHub Actions
-├── .gitlab-ci.yml              # Pipeline GitLab CI
+├── .gitlab-ci.yml              # Pipeline officiel GitLab CI (Lint → Test → Build → Deploy)
 ├── docs/
 │   ├── adr/                    # Registre des Décisions d'Architecture (ADR-001 à 008)
 │   ├── architecture/           # Spécifications et diagrammes C4

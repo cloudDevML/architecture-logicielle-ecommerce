@@ -42,13 +42,12 @@ Un projet moderne multi-composants (Microservices Spring Boot Java 21, Frontend 
 ## 3. Décision
 
 Nous mettons en place une configuration CI/CD double et isomorphe :
-1. **`.gitlab-ci.yml`** à la racine pour GitLab :
+1. **`.gitlab-ci.yml`** à la racine pour le dépôt officiel GitLab :
    - **Stage `lint`** : Vérification syntaxique ESLint du frontend et validation du format POM.
    - **Stage `test`** : Exécution de `mvn test` sur les microservices et `npm test -- --watchAll=false` sur le frontend.
    - **Stage `build`** : Packaging des JARs exécutables (`mvn package -DskipTests`).
    - **Stage `package`** : Construction des images Docker et tagguage.
    - **Stage `deploy`** : Déploiement automatisé par SSH / script Docker Compose sur l'environnement cloud.
-2. **`.github/workflows/ci-cd.yml`** pour GitHub Actions reproduisant exactement le même pipeline séquentiel.
 
 ---
 
