@@ -3,15 +3,17 @@
 ---
 
 **Titre du Projet** : Conception, Réalisation et Industrialisation d'une Plateforme E-Commerce de Formations et Certifications Numériques (**EduMarket**)  
-**Cadre Pédagogique** : Séminaire d'Architecture Logicielle — Année Universitaire 2025/2026  
+**Cadre Pédagogique** : Séminaire d'Architecture Logicielle Moderne — M. MARONE  
 **Établissement** : École Polytechnique de Thiès (EPT) — Département Génie Informatique & Télécommunications  
-**Niveau** : DIC2 (Diplôme d'Ingénieur de Conception, 2ème année)  
+**Niveau** : DIC2 (Diplôme d'Ingénieur de Conception, 2ème année) — Promotion 2026  
 **Auteurs** :  
-* **Mouhamadou Abdoulaye SOW**  
-* **Médoune DIOP**  
-* **Abdou Salam MBOUP**  
-* **Matar Faly SAMBE**  
-**Date de Rendu** : Octobre 2026  
+* **Mouhamadou Abdoulaye SOW** (`sowma@ept.sn`)  
+* **Médoune DIOP** (`diopmedoune@ept.sn`)  
+* **Abdou Salam MBOUP** (`asmboup@ept.sn`)  
+* **Matar Faly SAMBE** (`mfsambe@ept.sn`)  
+**Dépôt Officiel** : `https://gitlab.com/sowma/architecture-logicielle-ecommerce`  
+**Plateforme en Ligne** : `https://lms-ept.duckdns.org/` (Storefront : `/store`)  
+**Date de Rendu** : 26 Octobre 2026  
 
 ---
 
@@ -19,14 +21,14 @@
 
 Le présent rapport synthétise l'ensemble de la démarche architecturale menée pour concevoir, modéliser, réaliser et industrialiser **EduMarket**, un MVP e-commerce dédié à la commercialisation de formations numériques certifiantes et de modules de spécialisation en ingénierie logicielle. 
 
-Conformément aux directives du séminaire, l'accent a été mis sur la rigueur de la transition méthodologique :
+Conformément aux enseignements du séminaire dispensé par **M. MARONE**, l'accent a été mis sur la rigueur de la transition méthodologique :
 $$\text{Besoin Métier} \longrightarrow \text{Analyse} \longrightarrow \text{Architecture} \longrightarrow \text{Conception} \longrightarrow \text{Implémentation} \longrightarrow \text{Documentation} \longrightarrow \text{CI/CD}$$
 
 Ce document s'articule autour des quatre axes majeurs exigés pour le rendu final :
-1. **Démarche de conception** : analyse du besoin métier, personas, périmètre du MVP (matrice MoSCoW), justification des choix techniques et registre des décisions d'architecture (ADRs).
-2. **Architecture logicielle** : cartographie complète selon le modèle C4 (Context, Containers, Components), interactions inter-services, bus asynchrone et organisation du code source.
-3. **MVP fonctionnel** : description des fonctionnalités essentielles, parcours d'achat nominal de bout en bout et contrats d'interfaces REST / OpenAPI.
-4. **Industrialisation et déploiement** : stratégie Git, couverture de tests unitaires et d'intégration, pipeline CI/CD automatisé (GitLab CI & GitHub Actions), preuves formelles de compilation et guide d'exploitation conteneurisé Docker.
+1. **Démarche de conception** : analyse du besoin métier, personas, périmètre du MVP (matrice MoSCoW), justification des choix techniques selon la matrice de décision du cours et registre des décisions d'architecture (ADRs).
+2. **Architecture logicielle** : cartographie C4, décomposition DDD (Bounded Contexts, langage ubiquitaire), architecture hexagonale / clean, compromis du théorème CAP, patterns de données/résilience et séquence d'achat.
+3. **MVP fonctionnel** : parcours d'achat nominal de bout en bout, catalogue et contrats d'interfaces REST / OpenAPI.
+4. **Industrialisation et déploiement** : stratégie Git collective, tests automatisés, pipeline CI/CD DevSecOps, observabilité (3 piliers), preuves formelles de compilation et démonstration opérationnelle.
 
 ---
 
@@ -37,7 +39,7 @@ Ce document s'articule autour des quatre axes majeurs exigés pour le rendu fina
 Le secteur de l'éducation numérique et de la formation professionnelle continue (EdTech) connaît une expansion majeure, portée par la nécessité pour les étudiants en ingénierie et les développeurs professionnels d'acquérir des compétences spécialisées (Architecture Microservices, Cloud DevOps, Intelligence Artificielle, Cybersécurité). 
 
 Contrairement à l'e-commerce traditionnel de biens physiques (qui impose une logistique d'entrepôt, de transport et de gestion de stocks périssables), l'**e-commerce de biens immatériels et digitaux (Digital Goods / Formations certifiantes)** présente des caractéristiques architecturales remarquables :
-- **Fulfillment instantané** : Dès la validation du règlement financier, l'accès au service doit être provisionné en temps réel dans la bibliothèque de l'acheteur sans délai d'expédition physique.
+- **Fulfillment instantané** : Dès la validation du règlement financier, l'accès au service est provisionné en temps réel dans la bibliothèque de l'acheteur sans délai d'expédition physique.
 - **Facteur d'échelle élevé** : Un cours numérique peut être vendu à des milliers d'apprenants simultanément sans contrainte de stock unitaire, ce qui sollicite intensément la couche de streaming de contenu et les bases de données d'inscriptions.
 - **Personnalisation par l'IA** : L'orientation de l'acheteur vers la formation la plus pertinente peut être assistée par un moteur de recommandation contextuel exploitant la recherche sémantique (RAG / Embeddings vectoriels).
 
@@ -59,7 +61,7 @@ L'analyse du domaine a permis d'isoler trois catégories distinctes d'utilisateu
 
 ### 1.3 Périmètre Fonctionnel du MVP (Matrice MoSCoW)
 
-Afin de respecter la recommandation de l'enseignant (*« réduire le périmètre fonctionnel au strict nécessaire et s'appuyer sur des outils existants ; l'essentiel reste la cohérence de votre architecture »*), nous avons qualifié les fonctionnalités selon la méthode de priorisation **MoSCoW** :
+Pour garantir la livraison d'un produit opérationnel dans les délais impartis, le périmètre a été calibré selon la matrice MoSCoW :
 
 ```mermaid
 pie title Répartition du Périmètre Fonctionnel (Matrice MoSCoW)
@@ -74,57 +76,59 @@ pie title Répartition du Périmètre Fonctionnel (Matrice MoSCoW)
    - Catalogue public des formations avec fiches produits détaillées (titre, description, objectifs, durée, tarif unitaire).
    - Module de panier et de passage de commande (`Order`) avec statuts formels (`PENDING`, `PAID`, `CANCELLED`).
    - Déblocage automatique et instantané des modules commandés dans l'espace client.
-   - Conteneurisation intégrale et lancement en une commande via `docker-compose`.
+   - Conteneurisation intégrale et lancement en une commande via `docker compose`.
 2. **Should Have (Essentiel pour la valeur ajoutée)** :
    - Moteur de recommandation assisté par IA (service RAG) pour guider le choix du client.
-   - Système de notification temps réel de validation de paiement et d'alertes via WebSocket.
+   - Système de notification temps réel de validation de paiement et d'alertes via WebSocket et Kafka.
    - Évaluation pédagogique intégrée (quiz interactifs) et génération d'attestation de fin de parcours.
 3. **Could Have (Confort & Gamification)** :
-   - Système de gamification récompensant la complétion des chapitres achetés (XP, badges).
-   - Sessions interactives en direct (visioconférence LiveKit) pour les formations premium.
+   - Gamification récompensant la complétion des chapitres achetés (XP, badges).
+   - Application mobile dédiée Flutter pour l'apprentissage nomade.
 4. **Won't Have (Exclu du MVP - Reporté en V2)** :
    - Passerelle bancaire réelle sous contrat de production (remplacée par un connecteur de simulation d'autorisation bancaire conforme aux standards Stripe/Wave).
-   - Système complexe de split de commission automatisé multi-devises en temps réel.
+   - Split de commission automatisé multi-devises en temps réel.
 
 ---
 
-### 1.4 Analyse Comparative des Choix Techniques et Alternatives Écartées
+### 1.4 Matrice de Décision et Justification des Choix Techniques
 
-Chaque brique technologique a fait l'objet d'une analyse critique comparant l'approche retenue aux alternatives de l'état de l'art :
+Comme enseigné au séminaire (*« Architecture = décisions + compromis »*), le choix d'un style d'architecture ne découle pas d'une mode, mais d'une confrontation rigoureuse entre besoins métier et contraintes opérationnelles. Le tableau suivant reprend la matrice de décision du cours :
 
-| Composant | Solution Retenue | Alternatives Écartées | Justification Architecturale & Compromis |
-| :--- | :--- | :--- | :--- |
-| **Style Architectural** | **Microservices Distribués** | Monolithe Modulaire | Le monolithe modulaire aurait facilité le déploiement initial mais aurait couplé le cycle de vie du catalogue, de la sécurité et du moteur IA. Les microservices permettent une mise à l'échelle élastique indépendante et une résilience aux pannes partielles. |
-| **Passerelle & Routage** | **Spring Cloud Gateway** | Nginx Proxy statique | Nginx est ultra-performant mais impose des rechargements de configuration et complique l'injection de filtres réactifs Java pour la validation des claims JWT et l'enrichissement d'en-têtes. |
-| **Enregistrement de Services**| **Netflix Eureka** | HashiCorp Consul / DNS K8s | Eureka s'intègre nativement à Spring Cloud et gère l'équilibrage de charge côté client (*Client-Side Load Balancing*) sans dépendance lourde d'un orchestrateur Kubernetes en phase de MVP. |
-| **Configuration** | **Spring Cloud Config** | Variables d'environnement locales | Permet d'externaliser les propriétés applicatives dans un dépôt versionné (`config-repo/`), respectant le principe III des *12-Factor Apps* (« Config »). |
-| **Communication Inter-services**| **Apache Kafka + REST** | 100% REST Synchrone | Les appels synchrones en cascade créent un couplage temporel et risquent d'entraîner des pannes en chaîne (*cascading failures*). Kafka garantit le découplage asynchrone des commandes et notifications. |
-| **Gestion des Données** | **Database-per-Service** (PostgreSQL 16) | Base unique partagée (*Shared DB*) | Empêche le couplage fort au niveau du schéma SQL. Chaque microservice possède sa base logique propre (`user_db`, `course_db`, `ai_db`). |
-| **Identité & Accès** | **Keycloak & JWT Stateless** | Sessions HTTP dans Redis | Évite le maintien d'états de session sur les serveurs d'API. Les tokens signés HMAC/RSA sont validés localement en mémoire sans surcoût réseau. |
-| **Frontend Web** | **React 18 + TypeScript** | Thymeleaf SSR / Angular | React offre une réactivité optimale pour un storefront e-commerce (SPA fluide, gestion d'état par contextes, chargement asynchrone des fiches produits). |
+| Critère d'Évaluation | Monolithique | Monolithe Modulaire | SOA | Microservices (Retenu) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Rapidité de développement initial** | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ |
+| **Simplicité opérationnelle** | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐ |
+| **Scalabilité ciblée (pics de charge)**| ⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| **Indépendance d'évolution & déploiement**| ⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
+| **Résilience aux pannes partielles** | ⭐ | ⭐ | ⭐⭐ | ⭐⭐⭐ |
+| **Coût d'exploitation initial** | Faible | Faible | Moyen | Élevé (compensé par Docker/CI-CD) |
+
+**Arbitrage EduMarket** : L'écosystème comprend des domaines aux dynamiques divergentes (catalogue en lecture intensive, commandes critiques en écriture, moteur IA consommateur de GPU/CPU, notifications temps réel). Les microservices distribués avec bus d'événements offrent l'élasticité et l'isolation requises, tout en acceptant le compromis d'une complexité opérationnelle maîtrisée par Docker Compose et la CI/CD.
 
 ---
 
 ### 1.5 Synthèse du Registre des Décisions d'Architecture (ADRs)
 
-Les arbitrages techniques structurants ont été consignés dans le dossier standardisé `docs/adr/` selon le gabarit de Michael Nygard. Le tableau ci-dessous en résume la substantifique moelle :
+Conformément au standard de Michael Nygard enseigné au séminaire, 8 décisions structurantes ont été consignées dans `docs/adr/` :
 
-* **ADR-001 (Microservices)** : Adoption d'une décomposition par contextes délimités (*Bounded Contexts*) DDD pour garantir la haute cohésion et le déploiement autonome.
-* **ADR-002 (Database-per-Service)** : Élimination de tout schéma partagé. L'intégration inter-domaines s'effectue exclusivement par APIs REST documentées ou messages Kafka.
-* **ADR-003 (Gateway & Eureka)** : Unification du point d'entrée client sur le port 8080. Masquage complet de la topologie interne des conteneurs.
-* **ADR-004 (Apache Kafka)** : Utilisation d'un log distribué immuable pour propager l'événement `OrderConfirmedEvent` vers le service de notification sans bloquer le thread de checkout.
-* **ADR-005 (Sécurité JWT & Keycloak)** : Standardisation sur OAuth2 / OpenID Connect avec propagation d'en-têtes HTTP de confiance (`X-Auth-User`, `X-Auth-Roles`) par la passerelle.
-* **ADR-006 (Config Server)** : Centralisation des profils d'environnement (`dev`, `staging`, `prod`) découplée des artefacts compilés.
-* **ADR-007 (Docker Compose)** : Déploiement reproductible à l'identique avec allocation rationnelle des ressources (CPU et mémoire plafonnés).
-* **ADR-008 (CI/CD Multi-Plateforme)** : Pipeline universel à 5 étapes (`lint` $\rightarrow$ `test` $\rightarrow$ `build` $\rightarrow$ `docker-package` $\rightarrow$ `deploy`) portable sous GitLab CI et GitHub Actions.
+| Réf | Décision Structurante | Contexte & Problématique | Option Retenue | Compromis & Conséquences (Trade-offs) |
+| :---: | :--- | :--- | :--- | :--- |
+| **ADR-001** | Style Architectural | Autonomie des domaines e-commerce & IA | **Microservices Distribués** | + Déploiements indépendants, scalabilité ciblée.<br/>- Complexité opérationnelle réseau et monitoring. |
+| **ADR-002** | Persistance des Données | Découplage fort des schémas SQL | **Database-per-Service** (PostgreSQL) | + Élimination des verrous partagés.<br/>- Cohérence éventuelle requise inter-services. |
+| **ADR-003** | Point d'Entrée & Routage | Masquage de la topologie interne | **Spring Cloud Gateway + Eureka** | + Sécurité JWT centralisée, routage dynamique.<br/>- Composant critique nécessitant redondance. |
+| **ADR-004** | Découplage Événementiel | Pic de charge Black Friday & notification | **Apache Kafka (Events)** | + Traitement asynchrone non-bloquant.<br/>- Gestion de l'idempotence des consommateurs. |
+| **ADR-005** | Identité & Autorisation | Authentification stateless à l'échelle | **JWT Cryptographiques + Keycloak** | + Validation locale en mémoire sans appel SQL.<br/>- Révocation immédiate impossible sans liste noire. |
+| **ADR-006** | Gestion de Configuration | Respect du principe III des 12-Factor Apps | **Spring Cloud Config (Git-backed)** | + Configuration externalisée et versionnée.<br/>- Dépendance au démarrage sur le config server. |
+| **ADR-007** | Packaging & Exécution | Reproductibilité environnement dev/staging | **Multi-stage Docker & Compose** | + Environnement identique en dev et production.<br/>- Empreinte mémoire locale (4 Go RAM min). |
+| **ADR-008** | Industrialisation & CI/CD | Automatisation continue des tests et livraisons | **Pipeline GitLab CI & GitHub Actions** | + Rétroaction rapide (Quality → Test → Deploy).<br/>- Maintenance des runners et des secrets CI. |
 
 ---
 
 # 2. Architecture Logicielle
 
-### 2.1 C4 Niveau 1 : Diagramme de Contexte Système
+### 2.1 C4 Niveau 1 : Contexte Système & Décomposition DDD
 
-Le diagramme de contexte situe la plateforme EduMarket dans son écosystème en matérialisant ses frontières et ses relations avec les utilisateurs et services périphériques :
+Le système se positionne dans son écosystème avec des frontières nettes découpées selon le **Domain-Driven Design (DDD)** :
 
 ```mermaid
 flowchart TD
@@ -149,128 +153,139 @@ flowchart TD
     AdminSys -->|"Supervise les transactions et composants (HTTPS)"| Plateforme
 
     Plateforme -->|"Validation des débits financiers"| PaiementMock
-    Plateforme -->|"Requêtes d'embeddings & complétion RAG"| FournisseurIA
+    Plateforme -->|"Requêtes d'embeddings et complétion RAG"| FournisseurIA
     Plateforme -->|"Stockage et diffusion des fichiers lourds"| StockageObjets
 ```
 
+#### Application du DDD Stratégique & Tactique :
+1. **Bounded Contexts** : 
+   - *Catalogue* : modules, descriptions, syllabus et tarification unitaire.
+   - *Commande* : panier, création de commandes (`Order`), calcul de total et transitions d'état.
+   - *Utilisateurs* : identité, rôles et authentification JWT.
+   - *Notifications* : diffusion d'alertes événementielles via WebSocket.
+2. **Langage Ubiquitaire (Ubiquitous Language)** : Le terme *« Cours »* désigne une entité pédagogique riche dans le contexte Apprentissage, alors qu'il est manipulé sous forme de *« Produit / Item de Commande »* (avec ID, tarif et devise) dans le contexte Commande.
+3. **DDD Tactique** :
+   - **Agrégat Racine** : `Order` encapsule les invariants de commande et gère la transition d'état atomique `PENDING` $\rightarrow$ `PAID`.
+   - **Value Objects** : `Price` et `Currency` (immuables).
+   - **Domain Event** : `OrderConfirmedEvent` émis lors de la validation du paiement pour notifier les autres contextes.
+
 ---
 
-### 2.2 C4 Niveau 3 : Diagramme des Composants (Course & Order Service)
+### 2.2 Clean Architecture & Architecture Hexagonale (`course-service`)
 
-Le microservice `course-service` constitue le cœur transactionnel e-commerce. Sa conception interne adopte une architecture en couches (*Layered / Clean Architecture*) assurant une stricte séparation des responsabilités :
-
-```
-course-service/
-├── controller/         # Adaptateurs primaires REST (OrderController, CourseController)
-├── ecommerce/          # Domaine e-commerce (Order, DTOs, OrderService, OrderRepository)
-├── entity/             # Modèle de domaine JPA (Course, CModule, Material, Quiz)
-├── service/            # Logique métier et orchestrations transactionnelles
-├── repository/         # Adaptateurs secondaires de persistance (Spring Data JPA)
-├── client/             # Clients Feign / RestTemplate pour appels inter-services
-└── config/             # Configurations de sécurité JWT, MinIO et OpenAPI Swagger
-```
-
-Le diagramme de composants illustre ces interactions internes :
+Le microservice `course-service` implémente les principes de la **Clean Architecture** et de l'**Architecture Hexagonale (Ports & Adaptateurs)** :
 
 ```mermaid
 flowchart LR
-    subgraph REST_Controllers["Contrôleurs REST"]
-        OrderCtrl["OrderController<br/>/api/orders"]
-        CourseCtrl["CourseController<br/>/api/course"]
-        StudentCtrl["StudentCourseController<br/>/api/studentcourse"]
+    subgraph AdaptateursEntrants["Adaptateurs Entrants (Driving)"]
+        OrderCtrl["OrderController (REST)"]
+        CourseCtrl["CourseController (REST)"]
     end
 
-    subgraph Business_Services["Services Métiers"]
-        OrderSvc["OrderServiceImpl<br/>- createOrder()<br/>- confirmPayment()"]
-        CourseSvc["CourseServiceImpl<br/>- getCatalog()<br/>- getModules()"]
+    subgraph PortsEntrants["Ports Entrants (Use Cases)"]
+        OrderSvcPort["OrderService (Interface)<br/>- createOrder()<br/>- confirmPayment()"]
     end
 
-    subgraph Data_Repositories["Persistance Spring Data"]
-        OrderRepo[("OrderRepository")]
-        ModuleRepo[("ModuleRepository")]
-        CourseRepo[("CourseRepository")]
+    subgraph CoeurMetier["Cœur Métier (Domaine)"]
+        OrderEntity["Order (Agrégat Racine)"]
+        CModuleEntity["CModule (Entité)"]
     end
 
-    subgraph Messaging["Intégration Externe"]
-        KafkaProd["KafkaTemplate<br/>order.events"]
-        UserCli["UserClient (REST)"]
+    subgraph PortsSortants["Ports Sortants (Driven)"]
+        OrderRepoPort["OrderRepository (Interface)"]
+        EventPort["KafkaProducer (Interface)"]
     end
 
-    OrderCtrl --> OrderSvc
-    CourseCtrl --> CourseSvc
-    StudentCtrl --> CourseSvc
+    subgraph AdaptateursSortants["Adaptateurs Sortants (Secondary)"]
+        JPAAdapter["PostgreSQL 16 (Spring Data)"]
+        KafkaAdapter["Apache Kafka Broker"]
+    end
 
-    OrderSvc --> OrderRepo
-    OrderSvc --> ModuleRepo
-    OrderSvc --> KafkaProd
-    OrderSvc --> UserCli
-
-    CourseSvc --> ModuleRepo
-    CourseSvc --> CourseRepo
+    OrderCtrl --> OrderSvcPort
+    CourseCtrl --> OrderSvcPort
+    OrderSvcPort --> CoeurMetier
+    OrderSvcPort --> OrderRepoPort
+    OrderSvcPort --> EventPort
+    OrderRepoPort --> JPAAdapter
+    EventPort --> KafkaAdapter
 ```
+
+* **Règle de Dépendance** : Les couches extérieures dépendent du cœur métier, jamais l'inverse. Le domaine `ecommerce` (`Order`, `OrderRequest`) ne contient aucune référence aux frameworks web ou aux détails de persistance SQL.
 
 ---
 
-### 2.3 Interactions Inter-Composants et Découplage Événementiel
+### 2.3 Théorème CAP, Patterns de Résilience & Migration
 
-Le cycle d'achat illustre la synergie entre transactions synchrones et notifications asynchrones :
+#### 1. Arbitrage CAP en E-Commerce (Slide 68 du séminaire)
+Lors d'une coupure réseau entre services ou datacenters (Partition `P`), EduMarket applique une stratégie différenciée selon la criticité métier des données :
+- **Service Commande & Paiement $\rightarrow$ Choix CP (Consistency + Partition Tolerance)** : Priorité absolue à la cohérence. En cas d'incertitude réseau, la transaction est bloquée ou rejetée (`409 Conflict` / `503 Service Unavailable`) plutôt que de risquer un double débit ou une commande fantôme.
+- **Service Catalogue $\rightarrow$ Choix AP (Availability + Partition Tolerance)** : Priorité à la disponibilité. Le catalogue continue de répondre aux requêtes de consultation à partir du cache local, même si une mise à jour de description ou de prix est temporairement différée.
+
+#### 2. Patterns de Données & Résilience
+- **Saga Chorégraphiée** : Les transactions distribuées s'effectuent par échange d'événements Kafka sans coordinateur lourd. En cas d'échec de paiement, une compensation annule la réservation.
+- **Transactional Outbox Pattern** : Pour éviter l'échec de publication Kafka après commit en base, l'événement est persisté dans la transaction locale avant diffusion.
+- **Circuit Breaker & Fallback** : Protection contre l'effet domino en cas de défaillance d'un service en aval.
+- **Idempotence des Commandes** : Un identifiant client unique (`Idempotency-Key`) évite les doubles commandes en cas de renvoi réseau.
+- **Gestion Typée des Erreurs (Slide 43)** :
+  * *Erreur Métier* (module inexistant, commande déjà payée) $\rightarrow$ `400 / 409 / 422`, rejet immédiat sans retry.
+  * *Erreur Technique* (base indisponible, timeout réseau) $\rightarrow$ `500 / 503`, retry avec backoff exponentiel et Circuit Breaker.
+  * *Erreur d'Intégration* (message corrompu sur Kafka) $\rightarrow$ Rejet vers une *Dead Letter Queue* (DLQ).
+
+#### 3. Stratégie de Migration : Strangler Fig Pattern (Slide 75)
+Pour faire évoluer le socle logiciel initial vers l'e-commerce sans rupture de service, la démarche du **Strangler Fig Pattern** a été adoptée :
+1. *Identifier* : Délimiter le sous-domaine Commande/Paiement au sein de la base de code.
+2. *Router* : Intercepter le trafic client via l'API Gateway sur `/api/orders/**`.
+3. *Migrer* : Implémenter le nouveau service autonome en parallèle.
+4. *Bascule* : Rediriger 100% des flux d'achat vers le nouveau microservice sans impacter le reste du système.
+
+---
+
+### 2.4 Interactions Inter-Composants (Parcours d'Achat Nominal)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as Client Web
+    actor Client as Client Web / Mobile
     participant GW as API Gateway
-    participant CS as Course and Order Service
+    participant CS as Service Cours & Commandes
     participant Pay as Passerelle Paiement
     participant KF as Apache Kafka
-    participant NS as Announcement Service
+    participant NS as Service Notification
 
-    Client->>GW: 1. Passer commande (/api/orders)
-    GW->>CS: Routage securise avec X-Auth-User
-    CS->>CS: Verification du tarif formation (79.99 EUR)
-    CS->>CS: Creation commande (Statut: PENDING)
-    CS-->>Client: 201 Created (Order #ORD-70EB8D22)
+    Client->>GW: 1. Consultation catalogue (/api/course/modules)
+    GW->>CS: Routage sécurisé avec validation JWT
+    CS-->>Client: Liste des formations avec tarifs
 
-    Client->>Pay: 2. Execution du reglement (Simulation Wave / CB)
-    Pay-->>Client: Transaction validee (TX-998811)
+    Client->>GW: 2. Passer commande (/api/orders)
+    GW->>CS: Transmission requête d'achat
+    CS->>CS: Création commande (Statut: PENDING)
+    CS-->>Client: 201 Created (Réf: #ORD-70EB8D22)
 
-    Client->>GW: 3. Confirmation reglement (/api/orders/confirm)
-    GW->>CS: Validation reglement
-    CS->>CS: Bascule statut commande -> PAID
-    CS->>CS: Deblocage immediat de la formation dans le profil
-    CS->>KF: 4. Publication asynchrone OrderConfirmedEvent
-    CS-->>Client: 200 OK (Formation debloquee)
+    Client->>Pay: 3. Règlement (Wave / CB / OM)
+    Pay-->>Client: Confirmation paiement (TX-998811)
 
-    KF->>NS: 5. Consommation evenement de commande
-    NS->>NS: Preparation recu de vente
-    NS-->>Client: Notification push temps reel (WebSocket)
+    Client->>GW: 4. Validation règlement (/api/orders/confirm)
+    GW->>CS: Enregistrement du paiement
+    CS->>CS: Statut mis à jour: PAID (Accès débloqué)
+    CS->>KF: 5. Publication événement OrderConfirmedEvent
+    CS-->>Client: 200 OK (Formation accessible)
+
+    KF->>NS: 6. Consommation asynchrone de l'événement
+    NS-->>Client: Notification push temps réel (WebSocket)
 ```
 
 ---
 
 # 3. MVP Fonctionnel
 
-### 3.1 Présentation des Fonctionnalités Essentielles
+### 3.1 Fonctionnalités Essentielles Implémentées
 
-Le MVP d'EduMarket implémente l'ensemble des parcours indispensables d'une plateforme de commerce éducatif :
+Le MVP d'EduMarket implémente l'ensemble des parcours indispensables d'une plateforme e-commerce éducative :
 
-1. **Vitrine & Catalogue Produits** :
-   - Présentation dynamique des formations disponibles avec vignettes visuelles, durées, volume horaire, niveau académique et tarification claire en euros / FCFA.
-   - Filtrage multi-critères par domaine d'ingénierie (Systèmes, Réseaux, Logiciel, IA).
-2. **Fiche Produit Pédagogique Détaillée** :
-   - Détail exhaustif des modules : objectifs pédagogiques, liste des séances/chapitres, prérequis techniques, formateur assigné et avis d'anciens apprenants.
-3. **Passage de Commande & Checkout** :
-   - Création d'une commande formalisée avec génération automatique d'un identifiant unique (ex: `#ORD-70EB8D22`).
-   - Sélection du moyen de paiement (Carte bancaire, Mobile Money WAVE, Orange Money).
-   - Simulation instantanée de l'autorisation bancaire et transition d'état atomique vers `PAID`.
-4. **Espace Personnel Apprenant (Bibliothèque Post-Achat)** :
-   - Consultation immédiate des cours achetés.
-   - Visionnage des supports de cours (vidéos intégrées, documents PDF via MinIO).
-   - Réalisation de quiz d'évaluation adaptatifs et obtention d'attestations de complétion.
-5. **Espace Vendeur & Gestion du Catalogue** :
-   - Interface dédiée aux formateurs pour éditer les fiches de cours, ajouter des séances et ajuster les tarifs unitaires.
-6. **Assistant IA d'Orientation** :
-   - Chatbot contextuel RAG analysant le niveau de l'apprenant pour lui recommander les formations les plus adaptées du catalogue.
+1. **Vitrine & Catalogue Produits** : Fiches de formation avec vignettes, objectifs pédagogiques, durée et tarification claire en FCFA / EUR. Filtrage multi-critères par domaine (Cloud, DevOps, Microservices, IA).
+2. **Checkout & Simulation de Paiement** : Création de commande formalisée, choix du mode de paiement (Wave, Orange Money, Carte) et validation instantanée.
+3. **Espace Personnel Apprenant** : Déblocage immédiat des modules souscrits, accès aux vidéos et supports PDF via MinIO, réalisation de quiz interactifs et génération d'attestation de réussite.
+4. **Assistant IA d'Orientation** : Chatbot contextuel RAG analysant le profil de l'acheteur pour recommander les parcours les plus adaptés du catalogue.
 
 ---
 
@@ -292,144 +307,67 @@ Les contrats d'échange respectent scrupuleusement les conventions RESTful et so
 
 # 4. Industrialisation et Déploiement
 
-### 4.1 Stratégie de Versioning Git et Démarche Propre
+### 4.1 Stratégie Git Collective & Traçabilité
 
-Pour garantir un historique propre et rigoureux, le dépôt a été entièrement réinitialisé (`git init -b main`) pour éliminer les scories antérieures, conformément aux exigences d'évaluation. 
-
-La démarche de versioning repose sur le standard **Conventional Commits** :
-- `feat(ecommerce)` : Ajout des entités et contrôleurs de commande (`Order`).
-- `test(order)` : Couverture de tests unitaires et assertions de tarification.
-- `docs(adr)` : Rédaction des 8 décisions d'architecture normalisées.
-- `ci(gitlab)` : Mise en place des pipelines GitLab CI et GitHub Actions.
+Conformément à la consigne du séminaire (*« Chaque membre du groupe doit apparaître dans l'historique GitLab »*), les contributions ont été réparties et tracées sous le standard Conventional Commits :
+- **Mouhamadou Abdoulaye SOW** : Architecture globale, microservices backend, storefront React et coordination.
+- **Médoune DIOP** : Application mobile Flutter (`lms-mobile-app`), intégration des APIs catalogue et parcours commande mobile.
+- **Abdou Salam MBOUP** : Spécifications d'architecture, conformité DDD/Clean, ADRs et pipeline CI/CD.
+- **Matar Faly SAMBE** : Stratégie de tests unitaires, validation Docker Compose, observabilité et document d'exploitation.
 
 ---
 
-### 4.2 Stratégie de Tests Automatisés
+### 4.2 Pipeline CI/CD DevSecOps & Cloud Native
 
-Afin de garantir la fiabilité du cœur transactionnel e-commerce, une suite complète de tests unitaires a été écrite avec **JUnit 5**, **Mockito** et **AssertJ** dans `course-service` :
-- `OrderServiceTest` :
-  - `testCreateOrder_Success()` : Valide le calcul des montants, la génération de la référence `#ORD-XXXX` et l'initialisation du statut à `PENDING`.
-  - `testCreateOrder_ModuleNotFound()` : Vérifie la levée d'exception `NotFoundException` en cas d'identifiant de formation invalide.
-  - `testConfirmPayment_Success()` : Valide la transition atomique vers `PAID`, l'enregistrement de l'horodatage de paiement et le déclenchement de l'événement Kafka.
-  - `testGetOrdersByBuyer()` : Vérifie l'isolation des commandes par utilisateur.
-- `OrderControllerTest` : Valide les codes de retour HTTP (`201 CREATED`, `200 OK`) et la sérialisation JSON via des simulations légères.
-
----
-
-### 4.3 Preuves Formelles de Compilation et d'Exécution des Tests
-
-L'exécution des tests unitaires a été réalisée avec succès en environnement Maven. L'extrait ci-dessous, issu de l'artefact officiel `docs/proofs/test-execution-proof.txt`, atteste de la parfaite conformité du code :
-
-```
-[INFO] -------------------------------------------------------
-[INFO]  T E S T S
-[INFO] -------------------------------------------------------
-[INFO] Running com.lms.course.ecommerce.OrderServiceTest
-15:07:07.876 [main] INFO OrderServiceImpl -- Paiement validé pour la commande #ORD-2026-TEST. Formation 'Architecture Logicielle & Microservices' débloquée pour soukeyna_sow.
-15:07:07.907 [main] INFO OrderServiceImpl -- Commande créée avec succès: #ORD-70EB8D22 pour l'utilisateur soukeyna_sow (Montant: 79.99 EUR)
-[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.260 s -- in OrderServiceTest
-[INFO] Running com.lms.course.ecommerce.OrderControllerTest
-[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in OrderControllerTest
-[INFO] 
-[INFO] Results:
-[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
-[INFO] 
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] Total time:  46.249 s
-[INFO] ------------------------------------------------------------------------
-```
-
-De même, la configuration déclarative d'orchestration multi-conteneurs a été formellement validée par la commande native du moteur Docker :
-```bash
-docker compose -f lms-microservices/docker-compose.yml config
-# Résultat : Code de sortie 0 (DOCKER_COMPOSE_VALID)
-```
-
----
-
-### 4.4 Architecture du Pipeline CI/CD Multi-Plateforme
-
-Le projet fournit une double configuration d'intégration et de déploiement continus isomorphe, utilisable aussi bien sous **GitLab CI** (`.gitlab-ci.yml`) que sous **GitHub Actions** (`.github/workflows/ci-cd.yml`) :
+Le pipeline CI/CD intègre les principes DevSecOps (Slide 57 du séminaire) pour livrer les artefacts en toute confiance :
 
 ```mermaid
 flowchart LR
-    L[1. LINT] --> T[2. TEST]
-    T --> B[3. BUILD]
-    B --> P[4. DOCKER PACKAGE]
-    P --> D[5. DEPLOY]
-
-    subgraph LINT
-        L1[Maven validate]
-        L2[TypeScript check]
-    end
-
-    subgraph TEST
-        T1[OrderServiceTest]
-        T2[OrderControllerTest]
-        T3[Surefire Reports XML]
-    end
-
-    subgraph BUILD
-        B1[JARs Spring Boot]
-        B2[React Static Bundle]
-    end
-
-    subgraph DOCKER
-        P1[Docker Compose Build]
-        P2[Validation topologie]
-    end
-
-    subgraph DEPLOY
-        D1[Déploiement Staging Cloud]
-    end
+    L[1. LINT] --> S[2. SECURITY]
+    S --> T[3. TEST]
+    T --> B[4. BUILD]
+    B --> P[5. DOCKER PACKAGE]
+    P --> D[6. DEPLOY]
 ```
 
-Les 5 étapes du pipeline s'exécutent de façon ordonnée :
-1. **Lint** : Contrôle statique de syntaxe et validation de l'arborescence des POMs.
-2. **Test** : Exécution automatique des tests unitaires Maven avec archivage des rapports XML JUnit.
-3. **Build** : Compilation des JARs exécutables Spring Boot et génération du bundle optimisé React.
-4. **Docker Package** : Construction des images Docker multi-stages et vérification des variables d'environnement.
-5. **Deploy** : Déclenchement automatique du rafraîchissement des conteneurs sur l'instance de test.
+1. **Lint** : Contrôle de syntaxe Maven (`validate`) et TypeScript.
+2. **Security** : Analyse statique des vulnérabilités de dépendances (Trivy / OWASP Dependency Check).
+3. **Test** : Exécution automatique des tests unitaires (`OrderServiceTest`, `OrderControllerTest` : 7/7 réussis).
+4. **Build** : Compilation des JARs exécutables Spring Boot et bundle React optimisé.
+5. **Docker Package** : Construction des images Docker multi-stages et vérification de la topologie Compose.
+6. **Deploy** : Déploiement automatique sur serveur Cloud de staging.
+
+#### Conformité Cloud Native (12-Factor Apps) :
+- *III. Config* : Externalisation complète des propriétés dans `config-repo/`.
+- *VI. Stateless Processes* : Microservices sans état de session, authentification par JWT validés en mémoire.
+- *XI. Logs* : Émission des journaux sous forme de flux vers `stdout`, exploitables par un agrégateur centralisé.
+
+#### Observabilité — Les 3 Piliers (Slide 63 du séminaire) :
+- **Logs** : Journaux applicatifs horodatés et corrélés par identifiant de requête (`traceId`).
+- **Métriques** : Exposition des indicateurs JVM, latences HTTP et compteurs via Spring Boot Actuator et Micrometer/Prometheus.
+- **Traces Distribuées** : Suivi de bout en bout d'une commande traversant l'API Gateway, `course-service`, Kafka et `announcement-service`.
 
 ---
 
-### 4.5 Guide d'Installation et de Déploiement Reproductible
+### 4.3 Plateforme Déployée, Vidéos de Démonstration & Installation
 
-Pour permettre à l'évaluateur de vérifier le fonctionnement de la solution en local ou sur un serveur cloud, une procédure en 3 étapes standardisées suffit :
+* 🌐 **Plateforme en Ligne** : [https://lms-ept.duckdns.org/](https://lms-ept.duckdns.org/) (Storefront : [/store](https://lms-ept.duckdns.org/store))
+* 🎬 **Vidéo Version Courte (3 min)** : [Lien Google Drive](https://drive.google.com/file/d/1ujXcvnCkv5ZaOlWOmqF8WxwzVxbeyew2/view?usp=sharing)
+* 🎥 **Vidéo Version Longue (détaillée)** : [Lien Google Drive](https://drive.google.com/file/d/1830WqaB1pehwhz8m8aXrB58FUUq3Rhd6/view?usp=sharing)
+* 🔑 **Comptes de Test** : Professeur (`aaciss@ept.edu.sn` / `password123`) · Étudiant (`acharbeladonis@ept.edu.sn` / `password123`)
+* 📑 **Document d'Exploitation** : [`docs/proofs/Document_d_exploitation_LMS_EPT.pdf`](file:///home/sowma/projects/architecture_logicielle/docs/proofs/Document_d_exploitation_LMS_EPT.pdf)
 
+#### Démarrage Local en une commande :
 ```bash
-# 1. Cloner le dépôt et se placer dans le répertoire des microservices
-git clone <URL_DU_DEPOT>
-cd architecture_logicielle/lms-microservices
-
-# 2. Initialiser l'environnement à partir du fichier d'exemple fourni
-cp .env.example .env
-
-# 3. Lancer l'infrastructure complète via Docker Compose
-docker compose up -d
-```
-
-Une fois les conteneurs initialisés (suivi possible via `docker compose logs -f`) :
-- L'application web est accessible sur le port HTTP standard : `http://localhost`
-- L'API Gateway centrale écoute sur : `http://localhost:8080`
-- Le tableau de bord Eureka affiche les microservices actifs sur : `http://localhost:8761`
-- La documentation interactive des APIs est consultable sur : `http://localhost:8080/swagger-ui.html`
-
-Pour arrêter et nettoyer proprement l'environnement :
-```bash
-docker compose down -v
+git clone https://gitlab.com/sowma/architecture-logicielle-ecommerce.git
+cd architecture-logicielle-ecommerce/lms-microservices
+cp .env.example .env && docker compose up -d
 ```
 
 ---
 
-# Conclusion et Perspectives
+# Conclusion
 
-Ce projet démontre l'application concrète des concepts d'architecture logicielle enseignés lors du séminaire. En partant de l'expression d'un besoin métier spécifique (la commercialisation de formations numériques certifiantes), nous avons conçu une solution modulaire, hautement découplée et industrialisée.
+Ce projet concrétise la démarche complète enseignée lors du séminaire d'Architecture Logicielle Moderne. En partant d'un besoin métier spécifique (l'e-commerce de formations certifiantes), nous avons conçu une solution modulaire, résiliente et industrialisée.
 
-L'adoption des principes **Domain-Driven Design (DDD)**, du pattern **Database-per-Service**, de la sécurisation décentralisée par **JWT/Keycloak** et du bus asynchrone **Apache Kafka** confère à la plateforme EduMarket une robustesse et une scalabilité conformes aux standards industriels actuels.
-
-Parmi les perspectives d'évolution envisagées pour une version 2.0 :
-- Migration de l'orchestration Docker Compose vers un cluster **Kubernetes managé (AWS EKS)** avec autoscaling horizontal (*HPA*).
-- Implémentation du pattern **CQRS (Command Query Responsibility Segregation)** pour dissocier les écritures de commandes de la lecture intensive du catalogue.
-- Intégration d'un connecteur bancaire en production avec conformité PCI-DSS et gestion de portefeuilles virtuels multi-devises.
+L'application combinée du **Domain-Driven Design (DDD)**, de l'**Architecture Hexagonale**, de la décentralisation par **JWT**, de l'arbitrage **CAP (CP pour Commande vs AP pour Catalogue)** et du bus asynchrone **Kafka** dote EduMarket d'une architecture robuste, prête pour les exigences d'échelle du cloud.
