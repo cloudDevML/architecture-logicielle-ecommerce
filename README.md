@@ -1,6 +1,6 @@
 # EduMarket — Plateforme E-Commerce de Formations & Certifications Numériques
 
-[![CI/CD Pipeline](https://github.com/AbdoulayeSowq/edumarket-ecommerce-architecture/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/AbdoulayeSowq/edumarket-ecommerce-architecture/actions)
+[![CI/CD Pipeline](https://github.com/cloudDevML/architecture-logicielle-ecommerce/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/cloudDevML/architecture-logicielle-ecommerce/actions)
 [![Architecture](https://img.shields.io/badge/Architecture-Microservices%20Spring%20Cloud-blue.svg)](#architecture-globale)
 [![Module](https://img.shields.io/badge/Module-Architecture%20Logicielle-emerald.svg)](#contexte-académique)
 [![Promotion](https://img.shields.io/badge/EPT-DIC2%20Promotion%202026-purple.svg)](#auteurs)
@@ -207,6 +207,11 @@ Le rapport traite en profondeur des 4 axes imposés :
 
 ## 8. Auteurs
 
-* **Soukeyna SOW** — DIC2 Informatique & Télécommunications
-* **Équipe DIC2 Promotion 2026** — École Polytechnique de Thiès (EPT)
-* **Encadrement** : Professeurs du Séminaire d'Architecture Logicielle
+* **Mouhamadou Abdoulaye SOW**
+* **Médoune DIOP**
+* **Abdou Salam MBOUP**
+* **Matar Faly SAMBE**
+
+*Élèves-Ingénieurs en Génie Informatique & Télécommunications — DIC2 Promotion 2026*  
+*École Polytechnique de Thiès (EPT)*  
+*Encadrement : Professeurs du Séminaire d'Architecture Logicielle*

@@ -2,7 +2,7 @@
 
 * **Statut** : Accepté
 * **Date** : 2026-10-25
-* **Auteurs** : Soukeyna SOW & Équipe DIC2
+* **Auteurs** : Mouhamadou Abdoulaye SOW, Médoune DIOP, Abdou Salam MBOUP, Matar Faly SAMBE (DIC2 EPT)
 * **Contexte Technique** : Intégration inter-services et propagation d'événements métiers
 
 ---

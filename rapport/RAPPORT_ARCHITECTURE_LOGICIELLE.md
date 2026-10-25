@@ -6,7 +6,11 @@
 **Cadre Pédagogique** : Séminaire d'Architecture Logicielle — Année Universitaire 2025/2026  
 **Établissement** : École Polytechnique de Thiès (EPT) — Département Génie Informatique & Télécommunications  
 **Niveau** : DIC2 (Diplôme d'Ingénieur de Conception, 2ème année)  
-**Auteurs** : Soukeyna SOW & Équipe de projet DIC2  
+**Auteurs** :  
+* **Mouhamadou Abdoulaye SOW**  
+* **Médoune DIOP**  
+* **Abdou Salam MBOUP**  
+* **Matar Faly SAMBE**  
 **Date de Rendu** : Octobre 2026  
 
 ---
