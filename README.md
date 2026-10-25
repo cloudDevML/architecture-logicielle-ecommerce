@@ -5,7 +5,7 @@
 [![Module](https://img.shields.io/badge/Module-Architecture%20Logicielle-emerald.svg)](#contexte-académique)
 [![Promotion](https://img.shields.io/badge/EPT-DIC2%20Promotion%202026-purple.svg)](#auteurs)
 
-Projet transversal conçu et réalisé dans le cadre du module d'**Architecture Logicielle** (Promotion DIC2 2026).  
+Projet transversal conçu et réalisé dans le cadre du module d'**Architecture Logicielle** .  
 Ce dépôt matérialise la démarche complète vue en séminaire :  
 **Besoin métier → Analyse → Architecture → Conception → Implémentation → Documentation → CI/CD**.
 
