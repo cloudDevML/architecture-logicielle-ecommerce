@@ -21,6 +21,9 @@ Ce dossier documente l'architecture logicielle complète de la plateforme **EduM
 5. **[Diagramme de Déploiement : Topologie Docker & Cloud](05_deployment_topology.md)**  
    Organisation des réseaux Docker, volumes persistants, exposition des ports et hébergement cloud.
 
+6. **[Grille d'Audit Architectural & Conformité Séminaire M. MARONE](ARCHITECTURE_AUDIT_MARONE.md)**  
+   Évaluation point par point de la conformité du projet selon les 4 modules du séminaire (DDD, Hexagonal, CAP, CI/CD, Observabilité).
+
 ---
 
 ## Aperçu Visuel Rapide (C4 Niveau 1 - Contexte)

@@ -18,4 +18,5 @@ Chaque ADR documente le contexte d'une décision clé, les alternatives analysé
 | **[ADR-008](ADR-008-pipeline-ci-cd-automatise.md)** | Stratégie d'industrialisation et CI/CD multi-plateforme : GitLab CI & GitHub Actions | Accepté | Oct. 2026 | DevOps / Qualité |
 
 ---
-*Projet réalisé dans le cadre du séminaire d'Architecture Logicielle — DIC2 Promotion 2026.*
+*Lead Architecte & Rédacteur du Registre : **Abdou Salam MBOUP** (`salamboup2016@gmail.com`)*  
+*Séminaire d'Architecture Logicielle Moderne — M. MARONE (EPT, DIC2 Promotion 2026).*
