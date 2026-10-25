@@ -193,9 +193,8 @@ architecture_logicielle/
 │   ├── announcement-service/   # Notifications & messagerie
 │   ├── postgres-init/          # Script d'initialisation des bases de données
 │   └── docker-compose.yml      # Orchestration de l'infrastructure complète
-├── rapport/                    # Rapport synthétique d'Architecture (10 pages)
-│   ├── RAPPORT_ARCHITECTURE_LOGICIELLE.md
-│   └── RAPPORT_ARCHITECTURE_LOGICIELLE.pdf
+├── rapport/                    # Rapport synthétique d'Architecture (Markdown)
+│   └── RAPPORT_ARCHITECTURE_LOGICIELLE.md
 └── README.md                   # Présentation du projet
 ```
 
@@ -205,9 +204,8 @@ architecture_logicielle/
 
 Conformément aux consignes de rendu :
 * **Dépôt Git** : Contient l'intégralité du code source, l'historique propre, les Dockerfiles, la CI/CD et la documentation.
-* **Rapport de Synthèse (10 pages max)** : Disponible sous format Markdown et PDF prêt à imprimer :
+* **Rapport de Synthèse (10 pages max)** :
   * 📄 **[Consulter le Rapport d'Architecture Logicielle (Markdown)](rapport/RAPPORT_ARCHITECTURE_LOGICIELLE.md)**
-  * 📑 **[Télécharger le Rapport au format PDF (A4 imprimable)](rapport/RAPPORT_ARCHITECTURE_LOGICIELLE.pdf)**
 
 Le rapport traite en profondeur des 4 axes imposés :
 1. Démarche de conception (besoins, périmètre MVP, justifications, ADRs).
