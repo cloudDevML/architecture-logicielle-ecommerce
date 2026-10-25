@@ -1,52 +1,65 @@
 # Preuves de Déploiement et Démonstrations — EduMarket
 
-Ce document centralise les éléments de démonstration multimédia, les liens vers les captures vidéo et les preuves d'exécution des services en environnement conteneurisé.
+Ce document centralise les éléments de démonstration multimédia, les liens vers les captures vidéo, les accès à la plateforme déployée et les preuves d'exécution des services en environnement conteneurisé.
 
 ---
 
-## 1. Vidéo de Démonstration (Application Mobile Flutter & Parcours d'Achat)
+## 1. Vidéos de Démonstration (Application Mobile Flutter & Parcours d'Achat)
 
-Une démonstration complète du parcours utilisateur (consultation du catalogue de cours, panier, simulation de commande e-commerce, confirmation) a été enregistrée sur l'application mobile Flutter :
+Deux formats vidéo sont mis à disposition pour visualiser le fonctionnement complet de la solution :
 
-- **Lien Google Drive de la vidéo de démonstration** :  
-  🔗 **[Lien Vidéo Google Drive — Démonstration EduMarket Mobile](https://drive.google.com/drive/folders/VOTRE_ID_DRIVE_ICI?usp=sharing)**  
-  *(Remplacer ce lien par l'URL publique ou partagée de votre vidéo sur Google Drive)*
+* 🎬 **[Version Courte — Aperçu Rapide de la Plateforme (Google Drive)](https://drive.google.com/file/d/1ujXcvnCkv5ZaOlWOmqF8WxwzVxbeyew2/view?usp=sharing)**  
+  *Survol synthétique des fonctionnalités clés : catalogue de cours, panier, simulation de commande e-commerce et confirmation.*
+* 🎥 **[Version Longue — Démonstration Détaillée des Fonctionnalités (Google Drive)](https://drive.google.com/file/d/1830WqaB1pehwhz8m8aXrB58FUUq3Rhd6/view?usp=sharing)**  
+  *Parcours exhaustif présentant l'expérience utilisateur complète, l'application mobile Flutter (`lms-mobile-app`), la gestion des rôles et l'interaction des microservices.*
 
-### Points clés présentés dans la vidéo :
-1. Démarrage de l'application mobile Flutter (`lms-mobile-app`).
-2. Connexion / Session utilisateur.
-3. Consultation du catalogue de cours payants et certifications.
-4. Processus de commande (Checkout avec choix du moyen de paiement : Wave, Orange Money, Carte).
-5. Validation de la commande et confirmation avec référence unique (`CMD-...`).
+> [!TIP]
+> **Conseil de lecture** : Il est recommandé de visionner les vidéos en résolution 1080p. Commencez par la version courte pour une vision d'ensemble, puis approfondissez avec la version longue.
 
 ---
 
-## 2. Captures d'Écran des Services en Cours d'Exécution
+## 2. Accès à la Plateforme Déployée en Ligne
 
-Déposer les captures d'écran dans le dossier `docs/proofs/screenshots/` puis référencer les images ci-dessous :
+L'ensemble de la plateforme est déployé et opérationnel sur serveur Cloud accessible publiquement :
 
-### 2.1 Conteneurs Docker en fonctionnement (`docker compose ps`)
+* 🌐 **URL de la Plateforme en Production** : [https://lms-ept.duckdns.org/](https://lms-ept.duckdns.org/)
+* 🛒 **Storefront E-Commerce** : [https://lms-ept.duckdns.org/store](https://lms-ept.duckdns.org/store)
+* 📑 **Document d'Exploitation Officiel** : [Document_d_exploitation_LMS_EPT.pdf](file:///home/sowma/projects/architecture_logicielle/docs/proofs/Document_d_exploitation_LMS_EPT.pdf)
+
+### Comptes de Démonstration Pré-configurés :
+| Profil / Rôle | Identifiant (Email) | Mot de passe | Rôle Métier |
+| :--- | :--- | :--- | :--- |
+| **Professeur / Formateur** | `aaciss@ept.edu.sn` | `password123` | Création de cours, tarification, publication |
+| **Étudiant / Client** | `acharbeladonis@ept.edu.sn` | `password123` | Consultation catalogue, commande, accès aux cours |
+
+---
+
+## 3. Captures d'Écran et Statut des Services
+
+Les captures d'écran des composants en cours d'exécution sont archivées dans le dossier [`docs/proofs/screenshots/`](file:///home/sowma/projects/architecture_logicielle/docs/proofs/screenshots/) :
+
+### 3.1 Conteneurs Docker en fonctionnement (`docker compose ps`)
 ```bash
 docker compose -f lms-microservices/docker-compose.yml ps
 ```
 ![État des Conteneurs Docker](screenshots/01_docker_compose_ps.png)
-*(Remplacer par votre capture d'écran montrant tous les conteneurs au statut `Up` : eureka, gateway, course-service, etc.)*
+*(Conteneurs opérationnels : `api-gateway`, `discovery-server`, `config-server`, `course-service`, `user-service`, `ai-service`, `announcement-service`, `postgres_db`, `kafka`, `minio`).*
 
-### 2.2 Dashboard Eureka Service Registry (`http://localhost:8761`)
+### 3.2 Dashboard Eureka Service Registry (`http://localhost:8761`)
 ![Eureka Service Registry](screenshots/02_eureka_registry.png)
-*(Remplacer par la capture montrant les instances enregistrées : API-GATEWAY, CONFIG-SERVER, COURSE-SERVICE, AUTH-SERVICE, etc.)*
+*(Enregistrement dynamique des microservices avec statut UP et équilibrage de charge).*
 
-### 2.3 Storefront Web E-Commerce (`http://localhost/store`)
+### 3.3 Storefront Web E-Commerce (`http://localhost/store`)
 ![Catalogue Web Storefront](screenshots/03_storefront_web.png)
-*(Remplacer par la capture de l'interface d'achat React `/store` avec les cartes de cours et le modal de commande)*
+*(Interface React avec catalogue de formations, tarification unitaire, modal de checkout Wave/OM/CB).*
 
-### 2.4 Application Mobile Flutter (`lms-mobile-app`)
+### 3.4 Application Mobile Flutter (`lms-mobile-app`)
 ![Écrans Application Mobile](screenshots/04_mobile_app_screens.png)
-*(Remplacer par les captures d'écran du simulateur ou téléphone Android/iOS)*
+*(Écrans de navigation, catalogue mobile et session apprenant).*
 
 ---
 
-## 3. Preuves d'Exécution et Tests Automatisés
+## 4. Preuves d'Exécution et Tests Automatisés
 
-- [Preuve d'exécution des tests unitaires backend (Maven Surefire)](file:///home/sowma/projects/architecture_logicielle/docs/proofs/test-execution-proof.txt) : Validation des tests `OrderServiceTest` et `OrderControllerTest` (7/7 réussis).
-- [Preuve de validation de configuration Docker Compose](file:///home/sowma/projects/architecture_logicielle/docs/proofs/docker-compose-validation-proof.txt) : Validation syntaxique et structurelle des services orchestrés.
+- [Preuve d'exécution des tests unitaires backend (Maven Surefire)](file:///home/sowma/projects/architecture_logicielle/docs/proofs/test-execution-proof.txt) : Validation des tests `OrderServiceTest` et `OrderControllerTest` (7/7 tests réussis avec 0 échec).
+- [Preuve de validation de configuration Docker Compose](file:///home/sowma/projects/architecture_logicielle/docs/proofs/docker-compose-validation-proof.txt) : Validation syntaxique, résolution des ports et topologie réseau des microservices.
