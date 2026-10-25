@@ -90,3 +90,7 @@ nginx-ec2-host.conf*.jks
 *.keystore
 
 nginx-ec2-host.conf
+
+# Lecture slides / Course materials (copyright M. MARONE)
+SEMINAIRE_ARCHI_LOGICIEL_MODERNE.pdf
+

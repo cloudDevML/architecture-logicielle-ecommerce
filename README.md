@@ -5,9 +5,16 @@
 [![Module](https://img.shields.io/badge/Module-Architecture%20Logicielle-emerald.svg)](#contexte-académique)
 [![Promotion](https://img.shields.io/badge/EPT-DIC2%20Promotion%202026-purple.svg)](#auteurs)
 
-Projet transversal conçu et réalisé dans le cadre du module d'**Architecture Logicielle** .  
+Projet transversal conçu et réalisé dans le cadre du séminaire d'**Architecture Logicielle Moderne** (dispensé par **M. MARONE** — Promotion DIC2 2026, École Polytechnique de Thiès).  
 Ce dépôt matérialise la démarche complète vue en séminaire :  
 **Besoin métier → Analyse → Architecture → Conception → Implémentation → Documentation → CI/CD**.
+
+> ### 🌐 Démonstration en Ligne & Vidéos
+> * 🔗 **Plateforme déployée (Cloud)** : [https://lms-ept.duckdns.org/](https://lms-ept.duckdns.org/) (Storefront : [/store](https://lms-ept.duckdns.org/store))
+> * 🎬 **Vidéo Version Courte (3 min)** : [Voir sur Google Drive](https://drive.google.com/file/d/1ujXcvnCkv5ZaOlWOmqF8WxwzVxbeyew2/view?usp=sharing)
+> * 🎥 **Vidéo Version Longue (complète)** : [Voir sur Google Drive](https://drive.google.com/file/d/1830WqaB1pehwhz8m8aXrB58FUUq3Rhd6/view?usp=sharing)
+> * 🔑 **Comptes de test** : Professeur (`aaciss@ept.edu.sn` / `password123`) · Étudiant (`acharbeladonis@ept.edu.sn` / `password123`)
+> * 📑 **Document d'exploitation** : [Document_d_exploitation_LMS_EPT.pdf](docs/proofs/Document_d_exploitation_LMS_EPT.pdf)
 
 ---
 
@@ -91,19 +98,23 @@ Le système repose sur une **Architecture Microservices événementielle (Event-
 
 ## 3. Documentation d'Architecture & ADRs
 
-Toutes les décisions et représentations architecturales sont documentées de manière exhaustive :
+Conformément aux exigences du séminaire (*« un ADR par décision structurante dans le README »*), le tableau ci-dessous synthétise les arbitrages d'architecture majeurs :
 
-* 📁 **[Dossier des Décisions d'Architecture (ADRs)](docs/adr/README.md)** :
-  * [ADR-001 : Microservices vs Monolithe Modulaire](docs/adr/ADR-001-architecture-microservices.md)
-  * [ADR-002 : Stratégie Database-per-Service](docs/adr/ADR-002-database-per-service.md)
-  * [ADR-003 : API Gateway & Service Discovery](docs/adr/ADR-003-api-gateway-service-discovery.md)
-  * [ADR-004 : Communication Asynchrone avec Apache Kafka](docs/adr/ADR-004-communication-asynchrone-kafka.md)
-  * [ADR-005 : Sécurité Décentralisée par JWT & Keycloak](docs/adr/ADR-005-authentification-jwt-keycloak.md)
-  * [ADR-006 : Configuration Centralisée avec Spring Cloud Config](docs/adr/ADR-006-configuration-centralisee-spring-cloud-config.md)
-  * [ADR-007 : Conteneurisation & Orchestration Docker](docs/adr/ADR-007-conteneurisation-docker-compose.md)
-  * [ADR-008 : Stratégie CI/CD Multi-Plateforme](docs/adr/ADR-008-pipeline-ci-cd-automatise.md)
+| Réf | Décision Structurante | Contexte & Problématique | Option Retenue | Compromis & Conséquences (Trade-offs) |
+| :---: | :--- | :--- | :--- | :--- |
+| **[ADR-001](docs/adr/ADR-001-architecture-microservices.md)** | Style Architectural | Autonomie des domaines e-commerce & IA | **Microservices Distribués** | + Déploiements indépendants, scalabilité ciblée.<br/>- Complexité opérationnelle accrue (réseau, observabilité). |
+| **[ADR-002](docs/adr/ADR-002-database-per-service.md)** | Persistance des Données | Découplage fort des schémas SQL | **Database-per-Service** (PostgreSQL) | + Élimination des verrous partagés et couplages de schéma.<br/>- Nécessite cohérence éventuelle (Saga) au lieu de transactions ACID globales. |
+| **[ADR-003](docs/adr/ADR-003-api-gateway-service-discovery.md)** | Point d'Entrée & Routage | Masquage de la topologie interne aux clients | **Spring Cloud Gateway + Eureka** | + Sécurisation centralisée, équilibrage dynamique côté client.<br/>- Single Point of Failure si non répliqué (HA requise). |
+| **[ADR-004](docs/adr/ADR-004-communication-asynchrone-kafka.md)** | Découplage Événementiel | Pic de charge Black Friday & notification | **Apache Kafka (Events)** | + Traitement asynchrone non-bloquant, persistance du log.<br/>- Gestion de l'idempotence et de l'ordonnancement des messages. |
+| **[ADR-005](docs/adr/ADR-005-authentification-jwt-keycloak.md)** | Identité & Autorisation | Authentification stateless à l'échelle | **JWT Cryptographiques + Keycloak** | + Validation locale en mémoire sans appel réseau vers la base.<br/>- Révocation immédiate impossible sans liste noire temporaire. |
+| **[ADR-006](docs/adr/ADR-006-configuration-centralisee-spring-cloud-config.md)** | Gestion de Configuration | Respect du principe III des 12-Factor Apps | **Spring Cloud Config (Git-backed)** | + Configuration externalisée et versionnée par profil.<br/>- Dépendance au démarrage sur le serveur de configuration. |
+| **[ADR-007](docs/adr/ADR-007-conteneurisation-docker-compose.md)** | Packaging & Exécution | Reproductibilité environnement dev/staging | **Multi-stage Docker & Compose** | + Environnement identique en dev, test et staging.<br/>- Empreinte mémoire locale conséquente (4 Go RAM min). |
+| **[ADR-008](docs/adr/ADR-008-pipeline-ci-cd-automatise.md)** | Industrialisation & CI/CD | Automatisation des tests et du déploiement | **Pipeline GitLab CI & GitHub Actions** | + Rétroaction immédiate (Quality → Test → Build → Deploy).<br/>- Maintenance des runners et des secrets de déploiement. |
 
-* 📁 **[Diagrammes d'Architecture (Modèle C4)](docs/architecture/README.md)** :
+* 📁 **[Consulter les fiches complètes des ADRs](docs/adr/README.md)**
+
+### Diagrammes d'Architecture (Modèle C4 & Séquence)
+* 📁 **[Dossier des Spécifications d'Architecture](docs/architecture/README.md)** :
   * [C4 Niveau 1 : Diagramme de Contexte Système](docs/architecture/01_c4_system_context.md)
   * [C4 Niveau 2 : Diagramme des Conteneurs](docs/architecture/02_c4_container_diagram.md)
   * [C4 Niveau 3 : Diagramme des Composants (Catalog & Orders)](docs/architecture/03_c4_component_diagram.md)
@@ -170,6 +181,7 @@ architecture_logicielle/
 │   ├── architecture/           # Spécifications et diagrammes C4
 │   └── proofs/                 # Preuves de compilation et d'exécution des tests
 ├── lms-frontend/               # Application React 18 SPA (TypeScript / Tailwind)
+├── lms-mobile-app/             # Application Mobile Flutter (Dart - iOS / Android)
 ├── lms-microservices/          # Écosystème backend Spring Boot & Spring Cloud
 │   ├── api-gateway/            # Passerelle de routage & sécurité
 │   ├── discovery-server/       # Annuaire Eureka
