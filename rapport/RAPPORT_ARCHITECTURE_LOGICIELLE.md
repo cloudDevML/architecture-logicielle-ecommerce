@@ -155,65 +155,7 @@ flowchart TD
 
 ---
 
-### 2.2 C4 Niveau 2 : Diagramme des Conteneurs
-
-Le niveau conteneurs détaille la répartition des composants logiciels exécutables, les protocoles de communication et les magasins de persistance :
-
-```mermaid
-flowchart TB
-    ClientWeb["🌐 Single Page Application<br/>(React 18 / TypeScript / Nginx : Port 80)"]
-
-    subgraph Ingress["Couche d'Accès & Routage"]
-        Gateway["🚪 api-gateway<br/>(Spring Cloud Gateway : Port 8080)<br/>Filtres JWT, CORS, Routage dynamique"]
-    end
-
-    subgraph Infrastructure["Services d'Infrastructure"]
-        Eureka["🔍 discovery-server<br/>(Netflix Eureka : Port 8761)"]
-        ConfigServer["⚙️ config-server<br/>(Spring Cloud Config : Port 8888)"]
-    end
-
-    subgraph ServicesMetiers["Microservices Applicatifs"]
-        UserService["👤 user-service (8081)<br/>Comptes, profils, rôles"]
-        CourseService["📚 course-service (8082)<br/>Catalogue, pricing, commandes (Order)"]
-        UniService["🏛️ university-service (8083)<br/>Départements & catégories"]
-        AIService["🤖 ai-service (8084)<br/>Recommandation formations (pgvector)"]
-        AnnounceService["🔔 announcement-service (8085)<br/>Notifications & alertes WebSocket"]
-    end
-
-    subgraph StockageBroker["Bases de Données & Bus Événementiel"]
-        Kafka["📨 Apache Kafka Broker (9092)<br/>Topics: order.events, notification.events"]
-        UserDB[("🗄️ user_db<br/>(PostgreSQL 16)")]
-        CourseDB[("🗄️ course_db<br/>(PostgreSQL 16)")]
-        AIDB[("🧠 ai_db<br/>(pgvector/PostgreSQL)")]
-        AnnounceDB[("🗄️ announcement_db<br/>(PostgreSQL)")]
-        MinioStore["📦 MinIO S3 (9000)<br/>Objets binaires médias"]
-    end
-
-    ClientWeb -->|"Requêtes HTTP/REST"| Gateway
-    Gateway -->|"/api/user/**"| UserService
-    Gateway -->|"/api/course/** & /api/orders/**"| CourseService
-    Gateway -->|"/api/uni/**"| UniService
-    Gateway -->|"/api/ai/**"| AIService
-    Gateway -->|"/api/announcement/**"| AnnounceService
-
-    ServicesMetiers -.->|"Enregistrement / Heartbeat"| Eureka
-    ServicesMetiers -.->|"Lecture config au boot"| ConfigServer
-    Gateway -.->|"Résolution lb://"| Eureka
-
-    UserService --> UserDB
-    CourseService --> CourseDB
-    AIService --> AIDB
-    AnnounceService --> AnnounceDB
-    CourseService --> MinioStore
-
-    CourseService -->|"Publie OrderConfirmedEvent"| Kafka
-    Kafka -->|"Consomme événements de commande"| AnnounceService
-    Kafka -->|"Consomme événements de commande"| UserService
-```
-
----
-
-### 2.3 C4 Niveau 3 : Diagramme des Composants (Course & Order Service)
+### 2.2 C4 Niveau 3 : Diagramme des Composants (Course & Order Service)
 
 Le microservice `course-service` constitue le cœur transactionnel e-commerce. Sa conception interne adopte une architecture en couches (*Layered / Clean Architecture*) assurant une stricte séparation des responsabilités :
 
@@ -269,41 +211,39 @@ flowchart LR
 
 ---
 
-### 2.4 Interactions Inter-Composants et Découplage Événementiel
+### 2.3 Interactions Inter-Composants et Découplage Événementiel
 
 Le cycle d'achat illustre la synergie entre transactions synchrones et notifications asynchrones :
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as 👤 Client Web
-    participant GW as 🚪 API Gateway
-    participant CS as 📚 Course & Order Service
-    participant Pay as 💳 Passerelle Paiement
-    participant KF as 📨 Kafka (order.events)
-    participant NS as 🔔 Announcement Service
+    actor Client as Client Web
+    participant GW as API Gateway
+    participant CS as Course and Order Service
+    participant Pay as Passerelle Paiement
+    participant KF as Apache Kafka
+    participant NS as Announcement Service
 
-    Client->>GW: POST /api/orders { moduleId: 10, paymentMethod: "WAVE" }
-    GW->>CS: Routage sécurisé avec en-tête X-Auth-User
-    CS->>CS: Vérification du prix du module (79.99 EUR)
-    CS->>CS: Création de commande à l'état PENDING
+    Client->>GW: 1. Passer commande (/api/orders)
+    GW->>CS: Routage securise avec X-Auth-User
+    CS->>CS: Verification du tarif formation (79.99 EUR)
+    CS->>CS: Creation commande (Statut: PENDING)
     CS-->>Client: 201 Created (Order #ORD-70EB8D22)
 
-    Client->>Pay: Exécution du paiement (Simulation Wave)
-    Pay-->>Client: Transaction validée (TX-998811)
+    Client->>Pay: 2. Execution du reglement (Simulation Wave / CB)
+    Pay-->>Client: Transaction validee (TX-998811)
 
-    Client->>GW: POST /api/orders/{id}/confirm { transactionId: "TX-998811" }
-    GW->>CS: Confirmation de commande
-    CS->>CS: Bascule état de commande -> PAID
-    CS->>CS: Déblocage immédiat de la formation dans le profil apprenant
-    CS->)KF: Publication asynchrone OrderConfirmedEvent
-    CS-->>Client: 200 OK (Formation débloquée)
+    Client->>GW: 3. Confirmation reglement (/api/orders/confirm)
+    GW->>CS: Validation reglement
+    CS->>CS: Bascule statut commande -> PAID
+    CS->>CS: Deblocage immediat de la formation dans le profil
+    CS->>KF: 4. Publication asynchrone OrderConfirmedEvent
+    CS-->>Client: 200 OK (Formation debloquee)
 
-    par Consommation Asynchrone
-        KF->)NS: Consommation de l'événement de commande
-        NS->>NS: Préparation du reçu de vente
-        NS-->>Client: Notification temps réel push WebSocket
-    end
+    KF->>NS: 5. Consommation evenement de commande
+    NS->>NS: Preparation recu de vente
+    NS-->>Client: Notification push temps reel (WebSocket)
 ```
 
 ---

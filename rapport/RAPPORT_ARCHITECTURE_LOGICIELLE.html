@@ -98,6 +98,13 @@
             color: #1e293b;
             padding: 0;
         }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            page-break-inside: avoid;
+        }
         blockquote {
             margin: 6px 0;
             padding: 6px 10px;
@@ -321,60 +328,7 @@ $$\text{Besoin Métier} \longrightarrow \text{Analyse} \longrightarrow \text{Arc
     Plateforme --&gt;|&quot;Stockage et diffusion des fichiers lourds&quot;| StockageObjets
 </code></pre>
 <hr>
-<h3>2.2 C4 Niveau 2 : Diagramme des Conteneurs</h3>
-<p>Le niveau conteneurs détaille la répartition des composants logiciels exécutables, les protocoles de communication et les magasins de persistance :</p>
-<pre><code class="language-mermaid">flowchart TB
-    ClientWeb[&quot;🌐 Single Page Application&lt;br/&gt;(React 18 / TypeScript / Nginx : Port 80)&quot;]
-
-    subgraph Ingress[&quot;Couche d&#39;Accès &amp; Routage&quot;]
-        Gateway[&quot;🚪 api-gateway&lt;br/&gt;(Spring Cloud Gateway : Port 8080)&lt;br/&gt;Filtres JWT, CORS, Routage dynamique&quot;]
-    end
-
-    subgraph Infrastructure[&quot;Services d&#39;Infrastructure&quot;]
-        Eureka[&quot;🔍 discovery-server&lt;br/&gt;(Netflix Eureka : Port 8761)&quot;]
-        ConfigServer[&quot;⚙️ config-server&lt;br/&gt;(Spring Cloud Config : Port 8888)&quot;]
-    end
-
-    subgraph ServicesMetiers[&quot;Microservices Applicatifs&quot;]
-        UserService[&quot;👤 user-service (8081)&lt;br/&gt;Comptes, profils, rôles&quot;]
-        CourseService[&quot;📚 course-service (8082)&lt;br/&gt;Catalogue, pricing, commandes (Order)&quot;]
-        UniService[&quot;🏛️ university-service (8083)&lt;br/&gt;Départements &amp; catégories&quot;]
-        AIService[&quot;🤖 ai-service (8084)&lt;br/&gt;Recommandation formations (pgvector)&quot;]
-        AnnounceService[&quot;🔔 announcement-service (8085)&lt;br/&gt;Notifications &amp; alertes WebSocket&quot;]
-    end
-
-    subgraph StockageBroker[&quot;Bases de Données &amp; Bus Événementiel&quot;]
-        Kafka[&quot;📨 Apache Kafka Broker (9092)&lt;br/&gt;Topics: order.events, notification.events&quot;]
-        UserDB[(&quot;🗄️ user_db&lt;br/&gt;(PostgreSQL 16)&quot;)]
-        CourseDB[(&quot;🗄️ course_db&lt;br/&gt;(PostgreSQL 16)&quot;)]
-        AIDB[(&quot;🧠 ai_db&lt;br/&gt;(pgvector/PostgreSQL)&quot;)]
-        AnnounceDB[(&quot;🗄️ announcement_db&lt;br/&gt;(PostgreSQL)&quot;)]
-        MinioStore[&quot;📦 MinIO S3 (9000)&lt;br/&gt;Objets binaires médias&quot;]
-    end
-
-    ClientWeb --&gt;|&quot;Requêtes HTTP/REST&quot;| Gateway
-    Gateway --&gt;|&quot;/api/user/**&quot;| UserService
-    Gateway --&gt;|&quot;/api/course/** &amp; /api/orders/**&quot;| CourseService
-    Gateway --&gt;|&quot;/api/uni/**&quot;| UniService
-    Gateway --&gt;|&quot;/api/ai/**&quot;| AIService
-    Gateway --&gt;|&quot;/api/announcement/**&quot;| AnnounceService
-
-    ServicesMetiers -.-&gt;|&quot;Enregistrement / Heartbeat&quot;| Eureka
-    ServicesMetiers -.-&gt;|&quot;Lecture config au boot&quot;| ConfigServer
-    Gateway -.-&gt;|&quot;Résolution lb://&quot;| Eureka
-
-    UserService --&gt; UserDB
-    CourseService --&gt; CourseDB
-    AIService --&gt; AIDB
-    AnnounceService --&gt; AnnounceDB
-    CourseService --&gt; MinioStore
-
-    CourseService --&gt;|&quot;Publie OrderConfirmedEvent&quot;| Kafka
-    Kafka --&gt;|&quot;Consomme événements de commande&quot;| AnnounceService
-    Kafka --&gt;|&quot;Consomme événements de commande&quot;| UserService
-</code></pre>
-<hr>
-<h3>2.3 C4 Niveau 3 : Diagramme des Composants (Course &amp; Order Service)</h3>
+<h3>2.2 C4 Niveau 3 : Diagramme des Composants (Course &amp; Order Service)</h3>
 <p>Le microservice <code>course-service</code> constitue le cœur transactionnel e-commerce. Sa conception interne adopte une architecture en couches (<em>Layered / Clean Architecture</em>) assurant une stricte séparation des responsabilités :</p>
 <pre><code>course-service/
 ├── controller/         # Adaptateurs primaires REST (OrderController, CourseController)
@@ -422,38 +376,36 @@ $$\text{Besoin Métier} \longrightarrow \text{Analyse} \longrightarrow \text{Arc
     CourseSvc --&gt; CourseRepo
 </code></pre>
 <hr>
-<h3>2.4 Interactions Inter-Composants et Découplage Événementiel</h3>
+<h3>2.3 Interactions Inter-Composants et Découplage Événementiel</h3>
 <p>Le cycle d&#39;achat illustre la synergie entre transactions synchrones et notifications asynchrones :</p>
 <pre><code class="language-mermaid">sequenceDiagram
     autonumber
-    actor Client as 👤 Client Web
-    participant GW as 🚪 API Gateway
-    participant CS as 📚 Course &amp; Order Service
-    participant Pay as 💳 Passerelle Paiement
-    participant KF as 📨 Kafka (order.events)
-    participant NS as 🔔 Announcement Service
+    actor Client as Client Web
+    participant GW as API Gateway
+    participant CS as Course and Order Service
+    participant Pay as Passerelle Paiement
+    participant KF as Apache Kafka
+    participant NS as Announcement Service
 
-    Client-&gt;&gt;GW: POST /api/orders { moduleId: 10, paymentMethod: &quot;WAVE&quot; }
-    GW-&gt;&gt;CS: Routage sécurisé avec en-tête X-Auth-User
-    CS-&gt;&gt;CS: Vérification du prix du module (79.99 EUR)
-    CS-&gt;&gt;CS: Création de commande à l&#39;état PENDING
+    Client-&gt;&gt;GW: 1. Passer commande (/api/orders)
+    GW-&gt;&gt;CS: Routage securise avec X-Auth-User
+    CS-&gt;&gt;CS: Verification du tarif formation (79.99 EUR)
+    CS-&gt;&gt;CS: Creation commande (Statut: PENDING)
     CS--&gt;&gt;Client: 201 Created (Order #ORD-70EB8D22)
 
-    Client-&gt;&gt;Pay: Exécution du paiement (Simulation Wave)
-    Pay--&gt;&gt;Client: Transaction validée (TX-998811)
+    Client-&gt;&gt;Pay: 2. Execution du reglement (Simulation Wave / CB)
+    Pay--&gt;&gt;Client: Transaction validee (TX-998811)
 
-    Client-&gt;&gt;GW: POST /api/orders/{id}/confirm { transactionId: &quot;TX-998811&quot; }
-    GW-&gt;&gt;CS: Confirmation de commande
-    CS-&gt;&gt;CS: Bascule état de commande -&gt; PAID
-    CS-&gt;&gt;CS: Déblocage immédiat de la formation dans le profil apprenant
-    CS-&gt;)KF: Publication asynchrone OrderConfirmedEvent
-    CS--&gt;&gt;Client: 200 OK (Formation débloquée)
+    Client-&gt;&gt;GW: 3. Confirmation reglement (/api/orders/confirm)
+    GW-&gt;&gt;CS: Validation reglement
+    CS-&gt;&gt;CS: Bascule statut commande -&gt; PAID
+    CS-&gt;&gt;CS: Deblocage immediat de la formation dans le profil
+    CS-&gt;&gt;KF: 4. Publication asynchrone OrderConfirmedEvent
+    CS--&gt;&gt;Client: 200 OK (Formation debloquee)
 
-    par Consommation Asynchrone
-        KF-&gt;)NS: Consommation de l&#39;événement de commande
-        NS-&gt;&gt;NS: Préparation du reçu de vente
-        NS--&gt;&gt;Client: Notification temps réel push WebSocket
-    end
+    KF-&gt;&gt;NS: 5. Consommation evenement de commande
+    NS-&gt;&gt;NS: Preparation recu de vente
+    NS--&gt;&gt;Client: Notification push temps reel (WebSocket)
 </code></pre>
 <hr>
 <h1>3. MVP Fonctionnel</h1>
@@ -677,5 +629,4 @@ docker compose up -d
 <li>Implémentation du pattern <strong>CQRS (Command Query Responsibility Segregation)</strong> pour dissocier les écritures de commandes de la lecture intensive du catalogue.</li>
 <li>Intégration d&#39;un connecteur bancaire en production avec conformité PCI-DSS et gestion de portefeuilles virtuels multi-devises.</li>
 </ul>
-</body>
-</html>
+</body></html>
