@@ -155,6 +155,25 @@ const Login: React.FC = () => {
                         </button>
                     </form>
 
+                    <div style={{ marginTop: '1.2rem', textAlign: 'center' }}>
+                        <a
+                            href="/store"
+                            style={{
+                                display: 'inline-block',
+                                padding: '8px 16px',
+                                background: '#eff6ff',
+                                color: '#2563eb',
+                                borderRadius: '8px',
+                                textDecoration: 'none',
+                                fontWeight: 600,
+                                fontSize: '0.9rem',
+                                border: '1px solid #bfdbfe'
+                            }}
+                        >
+                            🛒 Explorer le Catalogue E-Commerce (EduMarket)
+                        </a>
+                    </div>
+
                     <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
                         <button
                             type="button"

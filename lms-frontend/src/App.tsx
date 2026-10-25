@@ -15,6 +15,7 @@ const AdminLayout = lazy(() => import('./pages/Admin/AdminLayout'));
 const LecturerLayout = lazy(() => import('./pages/Lecturer/LecturerLayout'));
 const StudentLayout = lazy(() => import('./pages/Student/StudentLayout'));
 const MeetingRoom = lazy(() => import('./pages/Meeting/MeetingRoom'));
+const Storefront = lazy(() => import('./pages/public/Storefront'));
 
 const LecturerOnboarding = lazy(() => import('./pages/Admin/lecturer/LecturerOnboarding'));
 const Announcements = lazy(() => import('./pages/Admin/communication/Announcements'));
@@ -178,6 +179,9 @@ const App: React.FC = () => {
                   <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
                   <Suspense fallback={<Loading text="Chargement..." overlay />}>
                   <Routes>
+                      <Route path="/store" element={<Storefront />} />
+                      <Route path="/catalogue" element={<Storefront />} />
+                      <Route path="/shop" element={<Storefront />} />
                       <Route path="/login" element={<LogoutRedirect />} />
                       <Route path="/unauthorized" element={<Unauthorized />} />
                       <Route path="/meeting" element={
